@@ -23,5 +23,6 @@
             "tests/",
             "database/"
         ]
-    }
+    },
+    "minimum-stability": "stable"
 }
