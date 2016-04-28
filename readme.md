@@ -1,20 +1,23 @@
 # Lumen PHP Framework
+## Secure authentication and authorization
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://poser.pugx.org/laravel/lumen-framework/d/total.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/lumen-framework/v/stable.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/lumen-framework/v/unstable.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://poser.pugx.org/laravel/lumen-framework/license.svg)](https://packagist.org/packages/laravel/lumen-framework)
+This is an implementation of Lumen PHP Framework with just the user management system, the main features are:
+- Random token 60 char authentication
+- Authorization levels
+- Google reCAPTCHA
+- Account activation via email
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+## Installation and configuration
 
-## Official Documentation
+```
+composer create-project marcocastignoli/lumen_auth --stability=dev --no-dev
+```
 
-Documentation for the framework can be found on the [Lumen website](http://lumen.laravel.com/docs).
+```
+php artisan migrate
+```
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+Just enter your Google reCAPTCHA private KEY in *config/captcha.php* and you're ready to go.
 
 ## License
 
