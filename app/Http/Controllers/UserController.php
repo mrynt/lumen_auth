@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use App\User;
 use Auth;
 use Illuminate\Support\Facades\Gate;
-
+use DateTime;
 class UserController extends Controller
 {
     /**
@@ -45,6 +45,7 @@ class UserController extends Controller
         if ($user) {
           $token=str_random(60);
           $user->api_token=$token;
+          $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
           $user->save();
           return $user->api_token;
         } else {
@@ -55,6 +56,11 @@ class UserController extends Controller
       }
     }
 
+    private function sendRegistration($email,$api_token){
+      $url="http://".$_SERVER['SERVER_NAME']."/users/confirm/".$api_token;
+      mail($email, 'Attiva', "Attiva il tuo account premendo su questo link: <a href='".$url."'></a>");
+    }
+
     public function register(Request $request){
       if ($request->has('username') && $request->has('password') && $request->has('email')) {
         $user = new User;
@@ -63,9 +69,9 @@ class UserController extends Controller
         $user->email=$request->input('email');
         $user->confirmed=false;
         $user->api_token=str_random(60);
+        $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
         if($user->save()){
-          $url="http://".$_SERVER['SERVER_NAME']."/users/confirm/".$user->api_token;
-          mail($request->input('email'), 'Attiva', "Attiva il tuo account premendo su questo link: <a href='".$url."'></a>");
+          $this->sendRegistration($request->input('email'),$user->api_token);
           return "SUCCESS";
         } else {
           return "ERROR";
@@ -78,9 +84,19 @@ class UserController extends Controller
     public function confirm($token){
       $user = User:: where("api_token", "=", $token)
                     ->first();
+      $date1 = new DateTime($user->expires_at);
+      $date2 = new DateTime("now");
+      if ($date1<$date2) {
+        $user->api_token=str_random(60);
+        $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
+        $user->save();
+        $this->sendRegistration($user->email,$user->api_token);
+        return "SENT_MAIL";
+      }
       if ($user) {
         $user->confirmed=true;
         $user->api_token=str_random(60);
+        $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
         $user->save();
         return "SUCCESS";
       } else {

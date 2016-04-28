@@ -34,8 +34,10 @@ class AuthServiceProvider extends ServiceProvider
 
         $this->app['auth']->viaRequest('api', function ($request) {
             if ($request->header('Authorization')) {
+                $datetime=date('Y-m-d H:i:s', time());
                 return User:: where('api_token', '=', $request->header('Authorization'))
                               ->where('confirmed', '=', true)
+                              ->where('expires_at', '>', $datetime)
                               ->first();
             }
         });
