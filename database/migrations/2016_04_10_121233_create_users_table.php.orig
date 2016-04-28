@@ -20,7 +20,6 @@ class CreateUsersTable extends Migration
             $table->boolean('confirmed');
             $table->boolean('auth');
             $table->string('api_token', 60)->unique();
-            $table->dateTime('expires_at');
             $table->timestamps();
         });
     }
