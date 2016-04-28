@@ -6,6 +6,7 @@ use App\User;
 use Auth;
 use Illuminate\Support\Facades\Gate;
 use DateTime;
+use DB;
 class UserController extends Controller
 {
     /**
@@ -14,11 +15,9 @@ class UserController extends Controller
      * @return void
      */
 
-    private $salt;
 
     public function __construct()
     {
-        $this->salt="changetheworld";
     }
 
     public function login(Request $request){
@@ -39,8 +38,12 @@ class UserController extends Controller
         if (!$result['success']) {
           return "CAPTCHA";
         }
+        $result_salt = DB::  table('users')
+                      ->select('salt')
+                      ->where("username", "=", $request->input('username'))
+                      ->first();
         $user = User:: where("username", "=", $request->input('username'))
-                      ->where("password", "=", sha1($this->salt.$request->input('password')))
+                      ->where("password", "=", sha1($result_salt->salt.$request->input('password')))
                       ->first();
         if ($user) {
           $token=str_random(60);
@@ -65,7 +68,9 @@ class UserController extends Controller
       if ($request->has('username') && $request->has('password') && $request->has('email')) {
         $user = new User;
         $user->username=$request->input('username');
-        $user->password=sha1($this->salt.$request->input('password'));
+        $salt=str_random(16);
+        $user->salt=$salt;
+        $user->password=sha1($salt.$request->input('password'));
         $user->email=$request->input('email');
         $user->confirmed=false;
         $user->api_token=str_random(60);

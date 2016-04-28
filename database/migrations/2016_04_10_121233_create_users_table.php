@@ -16,6 +16,7 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->string('username');
             $table->string('password');
+            $table->string('salt', 16);
             $table->string('email');
             $table->boolean('confirmed');
             $table->boolean('auth');
