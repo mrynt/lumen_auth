@@ -10,7 +10,7 @@ This is an implementation of Lumen PHP Framework with just the user management s
 ## Installation and configuration
 
 ```
-composer create-project marcocastignoli/lumen_auth --stability=dev --no-dev
+composer create-project marcocastignoli/lumen_auth YOUR_PROJECT 1.*
 ```
 
 ```
