@@ -4,6 +4,7 @@
     "keywords": ["framework", "laravel", "lumen"],
     "license": "MIT",
     "type": "project",
+    "minimum-stability": "stable",
     "require": {
         "php": ">=5.5.9",
         "laravel/lumen-framework": "5.2.*",
@@ -23,6 +24,5 @@
             "tests/",
             "database/"
         ]
-    },
-    "minimum-stability": "stable"
+    }
 }
