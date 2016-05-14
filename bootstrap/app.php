@@ -72,6 +72,7 @@ $app->singleton(
 
 $app->routeMiddleware([
     'authToken' => App\Http\Middleware\AuthToken::class,
+    'reCAPTCHA' => App\Http\Middleware\reCAPTCHA::class,
 ]);
 
 /*

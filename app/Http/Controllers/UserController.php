@@ -21,23 +21,7 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
-      if ($request->has('username') && $request->has('password') && $request->has('g-recaptcha-response')) {
-        //check if captcha is ok
-        $context = stream_context_create([
-            'http' => [
-                'method'  => 'POST',
-                'header'  => 'Content-type: application/x-www-form-urlencoded',
-                'content' => http_build_query([
-                    //TODO: change this key
-                    'secret' => config('captcha.secret'),
-                    'response' => $request->input('g-recaptcha-response')
-                ])
-            ]
-        ]);
-        $result = json_decode(file_get_contents('https://www.google.com/recaptcha/api/siteverify', false, $context),true);
-        if (!$result['success']) {
-          return "CAPTCHA";
-        }
+      if ($request->has('username') && $request->has('password')) {
         $result_salt = DB::  table('users')
                       ->select('salt')
                       ->where("username", "=", $request->input('username'))

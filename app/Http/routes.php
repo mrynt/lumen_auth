@@ -29,7 +29,10 @@ $app->get('/', function () use ($app) {
 / Login
 / Get the token
 */
-$app->post('users/login', 'UserController@login');
+$app->post('users/login', [
+    'middleware' => 'reCAPTCHA',
+    'uses' => 'UserController@login'
+]);
 
 /*
 / Register
