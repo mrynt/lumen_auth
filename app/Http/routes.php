@@ -46,12 +46,23 @@ $app->post('users/register', 'UserController@register');
 $app->get('users/confirm/{token}', 'UserController@confirm');
 
 /*
-/ Info
+/ Info user with id
 */
-$app->get('users/me',[
+$app->get('users/{id}',[
     'middleware' => array(
       'authToken',
       'Authorize'
     ),
-    'uses' => 'UserController@me'
+    'uses' => 'UserController@info'
+]);
+
+/*
+/ Edit
+*/
+$app->post('users/{id}/',[
+    'middleware' => array(
+      'authToken',
+      'Authorize'
+    ),
+    'uses' => 'UserController@edit'
 ]);

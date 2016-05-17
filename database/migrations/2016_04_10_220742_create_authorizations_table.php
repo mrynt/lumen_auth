@@ -16,14 +16,25 @@ class CreateAuthorizationsTable extends Migration
             $table->increments('id');
             $table->integer('auth');
             $table->string('controller_actions');
-            $table->timestamps();
+            $table->string('read');
+            $table->string('write');
         });
 
-        // Insert some stuff
         DB::table('authorizations')->insert(
             array(
                 'auth' => '0',
-                'controller_actions' => 'App\Http\Controllers\UserController@me'
+                'controller_actions' => 'App\Http\Controllers\UserController@info',
+                'read' => 'id,username',
+                'write' => ''
+            )
+        );
+
+        DB::table('authorizations')->insert(
+            array(
+                'auth' => '0',
+                'controller_actions' => 'App\Http\Controllers\UserController@edit',
+                'read' => 'id,username',
+                'write' => 'username,email'
             )
         );
     }

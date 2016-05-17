@@ -30,5 +30,7 @@ class User extends Model implements
      */
     protected $hidden = [
         'password',
+        'salt',
+        'api_token'
     ];
 }

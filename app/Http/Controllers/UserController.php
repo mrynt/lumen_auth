@@ -6,6 +6,8 @@ use App\User;
 use Auth;
 use DateTime;
 use DB;
+use App\Http\Controllers\AuthorizationController as Authorization;
+
 class UserController extends Controller
 {
     /**
@@ -92,7 +94,41 @@ class UserController extends Controller
       }
     }
 
-    public function me(){
-      return Auth::user();
+    private function get_user($request,$id){
+      $user=null;
+      if ($id=="me") {
+        $user=Auth::user();
+      } else {
+        $user = User::where("id", "=", $id)
+                      ->first();
+        if (!$user) {
+          return false;
+        }
+        $user=Authorization::read($request, $user);
+      }
+      return $user;
+    }
+
+    public function info(Request $request, $id){
+      $user=$this->get_user($request,$id);
+      if ($user) {
+        return $user;
+      } else {
+        return "No user found";
+      }
+    }
+
+    public function edit(Request $request, $id){
+      $user=$this->get_user($request,$id);
+      if ($user) {
+        foreach ($request->all() as $key => $value) {
+          $user->$key=$value;
+        }
+        $user=Authorization::write($request, $user);
+        $user->save();
+        return $this->get_user($request,$id);
+      } else {
+        return "No user found";
+      }
     }
 }
