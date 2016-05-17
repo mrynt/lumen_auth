@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use Auth;
-use Illuminate\Support\Facades\Gate;
 use DateTime;
 use DB;
 class UserController extends Controller
@@ -94,9 +93,6 @@ class UserController extends Controller
     }
 
     public function me(){
-      if (Gate::denies('authorization', [ class_basename($this), __FUNCTION__ ] )) {
-          abort(403);
-      }
       return Auth::user();
     }
 }

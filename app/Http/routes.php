@@ -30,7 +30,7 @@ $app->get('/', function () use ($app) {
 / Get the token
 */
 $app->post('users/login', [
-    'middleware' => 'reCAPTCHA',
+    //'middleware' => 'reCAPTCHA',
     'uses' => 'UserController@login'
 ]);
 
@@ -49,6 +49,9 @@ $app->get('users/confirm/{token}', 'UserController@confirm');
 / Info
 */
 $app->get('users/me',[
-    'middleware' => 'authToken',
+    'middleware' => array(
+      'authToken',
+      'Authorize'
+    ),
     'uses' => 'UserController@me'
 ]);

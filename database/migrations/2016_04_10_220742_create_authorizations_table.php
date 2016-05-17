@@ -15,7 +15,7 @@ class CreateAuthorizationsTable extends Migration
         Schema::create('authorizations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('auth');
-            $table->string('controller');
+            $table->string('controller_actions');
             $table->string('action');
             $table->timestamps();
         });

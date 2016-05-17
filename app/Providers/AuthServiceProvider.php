@@ -44,15 +44,13 @@ class AuthServiceProvider extends ServiceProvider
 
         //Authorizations
 
-        Gate::define('authorization', function (User $user, $controller, $action) {
+        Gate::define('authorization', function (User $user, $controller_actions) {
             $authorizations=app('db')->table('authorizations')
-                          ->select('controller', 'action')
                           ->where('auth', '=', $user->auth)
-                          ->get();
-            foreach ($authorizations as $authorization) {
-              if ($authorization->controller==$controller && $authorization->action==$action) {
-                return true;
-              }
+                          ->where('controller_actions', '=', $controller_actions)
+                          ->count();
+            if ($authorizations!=0) {
+              return true;
             }
             return false;
         });
