@@ -19,6 +19,8 @@ class Authorize
     {
       if (Gate::denies('authorization', $request->route()[1]['uses'])) {
           abort(403);
+      } else {
+        return $next($request);
       }
     }
 }

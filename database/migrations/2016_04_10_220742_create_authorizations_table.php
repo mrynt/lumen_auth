@@ -16,9 +16,16 @@ class CreateAuthorizationsTable extends Migration
             $table->increments('id');
             $table->integer('auth');
             $table->string('controller_actions');
-            $table->string('action');
             $table->timestamps();
         });
+
+        // Insert some stuff
+        DB::table('authorizations')->insert(
+            array(
+                'auth' => '0',
+                'controller_actions' => 'App\Http\Controllers\UserController@me'
+            )
+        );
     }
 
     /**
