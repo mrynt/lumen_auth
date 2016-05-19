@@ -19,7 +19,7 @@ class AuthorizationController extends Controller
     {
     }
 
-    static function read(Request $request, $object){
+    static function read(Request $request, $objects){
       if (isset(Auth::user()->auth)) {
         $authorization = Authorization::select("read")
                               ->where("auth","=",0)
@@ -27,12 +27,22 @@ class AuthorizationController extends Controller
                               ->first();
 
         $read=array_filter(explode(",", $authorization->read));
-        foreach ($object->getAttributes() as $key=>$property) {
-          if (!in_array($key,$read)) {
-            unset($object->$key);
+        if ("Illuminate\Database\Eloquent\Collection"!=get_class($objects)) {
+          foreach ($objects->getAttributes() as $key=>$property) {
+            if (!in_array($key,$read)) {
+              unset($objects->$key);
+            }
           }
+        } else {
+          $objects = $objects->each(function ($object, $id) use ($read) {
+            foreach ($object->getAttributes() as $key=>$property) {
+              if (!in_array($key,$read)) {
+                unset($object->$key);
+              }
+            }
+          });
         }
-        return $object;
+        return $objects;
       } else {
         return false;
       }

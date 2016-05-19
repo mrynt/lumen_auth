@@ -6,7 +6,7 @@ use App\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Http\Request;
-
+use App\Authorization;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -45,10 +45,9 @@ class AuthServiceProvider extends ServiceProvider
         //Authorizations
 
         Gate::define('authorization', function (User $user, $controller_actions) {
-            $authorizations=app('db')->table('authorizations')
-                          ->where('auth', '=', $user->auth)
-                          ->where('controller_actions', '=', $controller_actions)
-                          ->count();
+            $authorizations=Authorization::where('auth', '=', $user->auth)
+                                          ->where('controller_actions', '=', $controller_actions)
+                                          ->count();
             if ($authorizations!=0) {
               return true;
             }

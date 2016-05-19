@@ -66,3 +66,14 @@ $app->post('users/{id}/',[
     ),
     'uses' => 'UserController@edit'
 ]);
+
+/*
+/ Info user with id
+*/
+$app->get('users/',[
+    'middleware' => array(
+      'authToken',
+      'Authorize'
+    ),
+    'uses' => 'UserController@list'
+]);

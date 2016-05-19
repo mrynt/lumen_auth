@@ -109,6 +109,11 @@ class UserController extends Controller
       return $user;
     }
 
+    public function list(Request $request){
+      $users=User::all();
+      return Authorization::read($request, $users);
+    }
+
     public function info(Request $request, $id){
       $user=$this->get_user($request,$id);
       if ($user) {
