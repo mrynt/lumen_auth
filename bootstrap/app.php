@@ -2,6 +2,17 @@
 
 //TODO: just for testing
 header("Access-Control-Allow-Origin: *");
+if(array_key_exists('HTTP_ACCESS_CONTROL_REQUEST_HEADERS', $_SERVER)) {
+    header('Access-Control-Allow-Headers: '
+           . $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']);
+} else {
+    header('Access-Control-Allow-Headers: *');
+}
+
+if("OPTIONS" == $_SERVER['REQUEST_METHOD']) {
+    exit(0);
+}
+
 
 require_once __DIR__.'/../vendor/autoload.php';
 

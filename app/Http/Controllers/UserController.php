@@ -23,19 +23,9 @@ class UserController extends Controller
 
     public function login(Request $request){
       if ($request->has('username') && $request->has('password')) {
-        $result_salt = DB::  table('users')
-                      ->select('salt')
-                      ->where("username", "=", $request->input('username'))
-                      ->first();
-        $user = User:: where("username", "=", $request->input('username'))
-                      ->where("password", "=", sha1($result_salt->salt.$request->input('password')))
-                      ->first();
-        if ($user) {
-          $token=str_random(60);
-          $user->api_token=$token;
-          $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
-          $user->save();
-          return $user->api_token;
+        $token = User::login($request->username, $request->password);
+        if ($token) {
+          return $token;
         } else {
           return "MISMATCH";
         }
@@ -72,8 +62,7 @@ class UserController extends Controller
     }
 
     public function confirm($token){
-      $user = User:: where("api_token", "=", $token)
-                    ->first();
+      $user = User::where_token($token);
       $date1 = new DateTime($user->expires_at);
       $date2 = new DateTime("now");
       if ($date1<$date2) {
@@ -94,46 +83,25 @@ class UserController extends Controller
       }
     }
 
-    private function get_user($request,$id){
-      $user=null;
+    public function list(Request $request){
+      return User::list();
+    }
+
+    public function info(Request $request, $id){
       if ($id=="me") {
-        $user=Auth::user();
+        $user = User::me();
       } else {
-        $user = User::where("id", "=", $id)
-                      ->first();
-        if (!$user) {
-          return false;
-        }
-        $user=Authorization::read($request, $user);
+        $user = User::get($id);
       }
       return $user;
     }
 
-    public function list(Request $request){
-      $users=User::all();
-      return Authorization::read($request, $users);
-    }
-
-    public function info(Request $request, $id){
-      $user=$this->get_user($request,$id);
-      if ($user) {
-        return $user;
-      } else {
-        return "No user found";
-      }
-    }
-
     public function edit(Request $request, $id){
-      $user=$this->get_user($request,$id);
-      if ($user) {
-        foreach ($request->all() as $key => $value) {
-          $user->$key=$value;
-        }
-        $user=Authorization::write($request, $user);
-        $user->save();
-        return $this->get_user($request,$id);
-      } else {
-        return "No user found";
+      $updates=array();
+      foreach ($request->all() as $key => $value) {
+        $updates[$key]=$value;
       }
+      $user = User::show("*")->where("id","=",2);
+      return User::edit($user, $updates);
     }
 }

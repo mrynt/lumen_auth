@@ -41,17 +41,5 @@ class AuthServiceProvider extends ServiceProvider
                               ->first();
             }
         });
-
-        //Authorizations
-
-        Gate::define('authorization', function (User $user, $controller_actions) {
-            $authorizations=Authorization::where('auth', '=', $user->auth)
-                                          ->where('controller_actions', '=', $controller_actions)
-                                          ->count();
-            if ($authorizations!=0) {
-              return true;
-            }
-            return false;
-        });
     }
 }

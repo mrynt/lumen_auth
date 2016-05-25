@@ -50,8 +50,7 @@ $app->get('users/confirm/{token}', 'UserController@confirm');
 */
 $app->get('users/{id}',[
     'middleware' => array(
-      'authToken',
-      'Authorize'
+      'authToken'
     ),
     'uses' => 'UserController@info'
 ]);
@@ -61,8 +60,7 @@ $app->get('users/{id}',[
 */
 $app->post('users/{id}/',[
     'middleware' => array(
-      'authToken',
-      'Authorize'
+      'authToken'
     ),
     'uses' => 'UserController@edit'
 ]);
@@ -72,8 +70,7 @@ $app->post('users/{id}/',[
 */
 $app->get('users/',[
     'middleware' => array(
-      'authToken',
-      'Authorize'
+      'authToken'
     ),
     'uses' => 'UserController@list'
 ]);

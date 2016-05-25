@@ -15,26 +15,36 @@ class CreateAuthorizationsTable extends Migration
         Schema::create('authorizations', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('auth');
-            $table->string('controller_actions');
-            $table->string('read');
-            $table->string('write');
+            $table->string('object');
+            $table->string('field');
+            $table->string('own');
+            $table->char('store',1);
+            $table->char('update',1);
+            $table->char('destroy',1);
+            $table->char('show',1);
         });
 
         DB::table('authorizations')->insert(
             array(
                 'auth' => '0',
-                'controller_actions' => 'App\Http\Controllers\UserController@info',
-                'read' => 'id,username',
-                'write' => ''
+                'object' => 'User',
+                'field' => 'username',
+                'store'=>2,
+                'update'=>2,
+                'destroy'=>2,
+                'show'=>2,
             )
         );
 
         DB::table('authorizations')->insert(
             array(
                 'auth' => '0',
-                'controller_actions' => 'App\Http\Controllers\UserController@edit',
-                'read' => 'id,username',
-                'write' => 'username,email'
+                'object' => 'User',
+                'field' => 'email',
+                'store'=>2,
+                'update'=>2,
+                'destroy'=>2,
+                'show'=>2,
             )
         );
     }

@@ -8,6 +8,12 @@ use Auth;
 use DateTime;
 use DB;
 */
+
+function get_class_name($classname){
+  if ($pos = strrpos(get_class($classname), '\\')) return substr(get_class($classname), $pos + 1);
+  return $pos;
+}
+
 class AuthorizationController extends Controller
 {
     /**
@@ -19,52 +25,79 @@ class AuthorizationController extends Controller
     {
     }
 
-    static function read(Request $request, $objects){
-      if (isset(Auth::user()->auth)) {
-        $authorization = Authorization::select("read")
-                              ->where("auth","=",0)
-                              ->where("controller_actions","=",$request->route()[1]['uses'])
-                              ->first();
+    static function store(){
 
-        $read=array_filter(explode(",", $authorization->read));
-        if ("Illuminate\Database\Eloquent\Collection"!=get_class($objects)) {
-          foreach ($objects->getAttributes() as $key=>$property) {
-            if (!in_array($key,$read)) {
-              unset($objects->$key);
-            }
-          }
+    }
+
+    static function update($where = null, $object, $updates){
+      $auth=Auth::user()->auth;
+      if (isset($auth)) {
+        $permission=0;
+        if ($where=='my') {
+          $permission=1;
+          $objects = $object::where($own, "=", Auth::user()->id);
+        } else if ($where=="*"){
+          $permission=2;
+          $objects = $object::whereRaw("1 = 1");
+        } else if (isset($where->permission)){
+          $permission = $where->permission;
+          $objects = $where;
         } else {
-          $objects = $objects->each(function ($object, $id) use ($read) {
-            foreach ($object->getAttributes() as $key=>$property) {
-              if (!in_array($key,$read)) {
-                unset($object->$key);
-              }
-            }
-          });
+          return false;
         }
-        return $objects;
-      } else {
-        return false;
-      }
-    }
 
-    static function write(Request $request, $object){
-      if (isset(Auth::user()->auth)) {
-        $authorization = Authorization::select("write")
-                              ->where("auth","=",0)
-                              ->where("controller_actions","=",$request->route()[1]['uses'])
-                              ->first();
-
-        $write=array_filter(explode(",", $authorization->write));
-        foreach ($object->getAttributes() as $key=>$property) {
-          if (!in_array($key,$write)) {
-            unset($object->$key);
+        $fields_own = Authorization::select("field","own")
+                              ->where("auth", "=", $auth)
+                              ->where("update", ">=", $permission)
+                              ->where("update", "!=", 0)
+                              ->where("object", "=", get_class_name($object));
+        $select=$fields_own->pluck('field')->all();
+        $own=$fields_own->pluck('own')->first();
+        if (count($select)==0) {
+          return $object;
+        }
+        $real_updates=array();
+        foreach ($updates as $key => $value) {
+          if (in_array($key,$select)) {
+            $real_updates[$key]=$value;
           }
         }
-        return $object;
-      } else {
-        return false;
+
+        return $objects->update($real_updates);
       }
     }
 
+    static function destroy(){
+
+    }
+
+    static function show($where = null, $object){
+      $auth=Auth::user()->auth;
+      if (isset($auth)) {
+        $permission=0;
+        if ($where=='*') {
+          $permission=2;
+        } else if ($where=='my'){
+          $permission=1;
+        }
+
+        $fields_own = Authorization::select("field","own")
+                              ->where("auth", "=", $auth)
+                              ->where("show", ">=", $permission)
+                              ->where("show", "!=", 0)
+                              ->where("object", "=", get_class_name($object));
+        $select=$fields_own->pluck('field')->all();
+        if (count($select)==0) {
+          return $object;
+        }
+        $objects = $object::select($select);
+        if ($where=='my') {
+          if ($fields_own->pluck('own')->first()!=null) {
+            $objects->where($fields_own->pluck('own')->first(), "=", Auth::user()->id);
+          }
+        }
+        $objects->permission=$permission;
+        return $objects;
+      }
+    }
 }
