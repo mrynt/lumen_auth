@@ -3,8 +3,7 @@
 
 This is an implementation of Lumen PHP Framework with just the user management system, the main features are:
 - Random token 60 char authentication
-- Authorization levels
-- Read and write permissions
+- Authorization and permissions
 - Google reCAPTCHA
 - Account activation via email
 
@@ -22,24 +21,27 @@ Just enter your Google reCAPTCHA private KEY in *config/captcha.php* and you're 
 
 ## Help
 
-###Read and write permissions
+###Authorization and permissions
+All the permissions are managed from the authorization table, one row corrispond to one rule.
+These are the conditions of a rule:
 
-It works like this:
+- AUTH [INT]: is the level of authorization that you can assign to a User
+- OBJECT [STRING]: is the object of this rule (name of the class)
+- FIELD [STRING]: is the property of the object that is covered by this rule
+- OWN [STRING]: is the property of the object that is used to define the owner (its id)
+- STORE, UPDATE, DESTROY, SHOW [INT:0,1,2]: are the level of permission for each action. 0 is no permission, 1 is permission on own objects, 2 is permission on all object
 
-First, use the standard methods to get your object, for example:
-```
-$user = User::where("id", "=", $id)->first();
-```
+The AuthorizationController has 4 methods:
 
-Then use the object as a parameter in the read function with the request
-```
-$user = Authorization::read($request, $user);
-```
+####Show
+You can use this method to get informations from the database in a safe way.
 
-The read method is going to read from the authorizations table the read column, it gets the row corresponding to the auth level of the logged user ("auth") AND the controller_actions (that is the action called inside the request).
-When it finds the read permissions (that are the names of the columns of the object), it removes from the object all the property that the logged user can't read.
-
-The same happens with the write method.
+'''
+show($whom, $object)
+'''
+$whom: "my" | "\*"
+$object: every kind of declared object in your project
+returns: the eloquent model of object (so remember to "->get()"!)
 
 ## License
 
