@@ -25,12 +25,52 @@ class AuthorizationController extends Controller
     {
     }
 
-    static function store(){
+    private static function auth(){
+      if (Auth::user()) {
+        return Auth::user()->auth;
+      } else {
+        return 0;
+      }
+    }
 
+    static function store($where , $object , $updates){
+      $auth=self::auth();
+      if (isset($auth)) {
+        if ($where=='my') {
+          $permission=1;
+        } else if ($where=='*'){
+          $permission=2;
+        } else {
+          throw new \RuntimeException('Only "me" or "*"');
+        }
+
+        $fields_own = Authorization::select("field","own")
+                              ->where("auth", "=", $auth)
+                              ->where("store", ">=", $permission)
+                              ->where("store", "!=", 0)
+                              ->where("object", "=", get_class_name($object));
+        $select=$fields_own->pluck('field')->all();
+        if (count($select)==0) {
+          return false;
+        }
+        $new_object=$object;
+        $check=0;
+        foreach ($updates as $key => $value) {
+          if ( ( in_array("*",$select) ) || in_array($key,$select)) {
+            $new_object->{$key}=$value;
+            $check++;
+          }
+        }
+        if ($check!=0) {
+          return $new_object->save();
+        } else {
+          return false;
+        }
+      }
     }
 
     static function update($where = null, $object, $updates){
-      $auth=Auth::user()->auth;
+      $auth=self::auth();
       if (isset($auth)) {
         $permission=0;
         if ($where=='my') {
@@ -39,11 +79,15 @@ class AuthorizationController extends Controller
         } else if ($where=="*"){
           $permission=2;
           $objects = $object::whereRaw("1 = 1");
-        } else if (isset($where->permission)){
-          $permission = $where->permission;
+        } else if (is_object($where)){
+          if (isset($where->permission)) {
+            $permission = $where->permission;
+          } else {
+            $permission=0;
+          }
           $objects = $where;
         } else {
-          return false;
+          throw new \RuntimeException('Only "me", "*", or an object.');
         }
 
         $fields_own = Authorization::select("field","own")
@@ -54,11 +98,11 @@ class AuthorizationController extends Controller
         $select=$fields_own->pluck('field')->all();
         $own=$fields_own->pluck('own')->first();
         if (count($select)==0) {
-          return $object;
+          return false;
         }
         $real_updates=array();
         foreach ($updates as $key => $value) {
-          if (in_array($key,$select)) {
+          if ( ( in_array("*",$select) ) || in_array($key,$select)) {
             $real_updates[$key]=$value;
           }
         }
@@ -72,15 +116,15 @@ class AuthorizationController extends Controller
     }
 
     static function show($where = null, $object){
-      $auth=Auth::user()->auth;
+      $auth=self::auth();
       if (isset($auth)) {
-        $permission=0;
-        if ($where=='*') {
-          $permission=2;
-        } else if ($where=='my'){
+        if ($where=='my') {
           $permission=1;
+        } else if ($where=='*'){
+          $permission=2;
+        } else {
+          throw new \RuntimeException('Only "me" or "*"');
         }
-
         $fields_own = Authorization::select("field","own")
                               ->where("auth", "=", $auth)
                               ->where("show", ">=", $permission)
@@ -88,7 +132,7 @@ class AuthorizationController extends Controller
                               ->where("object", "=", get_class_name($object));
         $select=$fields_own->pluck('field')->all();
         if (count($select)==0) {
-          return $object;
+          return $object->whereRaw("1=0");
         }
         $objects = $object::select($select);
         if ($where=='my') {

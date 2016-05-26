@@ -41,17 +41,19 @@ class UserController extends Controller
 
     public function register(Request $request){
       if ($request->has('username') && $request->has('password') && $request->has('email')) {
-        $user = new User;
-        $user->username=$request->input('username');
         $salt=str_random(16);
-        $user->salt=$salt;
-        $user->password=sha1($salt.$request->input('password'));
-        $user->email=$request->input('email');
-        $user->confirmed=false;
-        $user->api_token=str_random(60);
-        $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
-        if($user->save()){
-          $this->sendRegistration($request->input('email'),$user->api_token);
+        $api_token=str_random(60);
+        $fields = [
+          "username"=>$request->input('username'),
+          "password"=>sha1($salt.$request->input('password')),
+          "salt"=>$salt,
+          "email"=>$request->input('email'),
+          "confirmed"=>false,
+          "api_token"=>$api_token,
+          "expires_at"=>date('Y-m-d H:i:s', strtotime('+14 day', time()))
+        ];
+        if(User::register($fields)){
+          $this->sendRegistration($request->input('email'),$api_token);
           return "SUCCESS";
         } else {
           return "ERROR";
@@ -61,26 +63,40 @@ class UserController extends Controller
       }
     }
 
+    public function create(Request $request){
+      if (User::store($request->all())) {
+        return "OK";
+      } else {
+        return "NO";
+      }
+    }
+
     public function confirm($token){
       $user = User::where_token($token);
       $date1 = new DateTime($user->expires_at);
       $date2 = new DateTime("now");
+      $api_token = str_random(60);
+      $expires_at = date('Y-m-d H:i:s', strtotime('+14 day', time()));
       if ($date1<$date2) {
-        $user->api_token=str_random(60);
-        $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
-        $user->save();
-        $this->sendRegistration($user->email,$user->api_token);
+        $updates = [
+          "api_token"=>$api_token,
+          "expires_at"=>$expires_at
+        ];
+        User::edit($user, $updates);
+        $this->sendRegistration($user->email,$api_token);
         return "SENT_MAIL";
       }
       if ($user) {
-        $user->confirmed=true;
-        $user->api_token=str_random(60);
-        $user->expires_at=date('Y-m-d H:i:s', strtotime('+14 day', time()));
-        $user->save();
-        return "SUCCESS";
-      } else {
-        return "ERROR";
+        $updates = [
+          "api_token"=>$api_token,
+          "expires_at"=>$expires_at,
+          "confirmed"=>true
+        ];
+        if (User::edit($user, $updates)) {
+          return "SUCCESS";
+        }
       }
+      return "ERROR";
     }
 
     public function list(Request $request){
@@ -91,7 +107,7 @@ class UserController extends Controller
       if ($id=="me") {
         $user = User::me();
       } else {
-        $user = User::get($id);
+        $user = User::get_($id);
       }
       return $user;
     }
@@ -101,7 +117,7 @@ class UserController extends Controller
       foreach ($request->all() as $key => $value) {
         $updates[$key]=$value;
       }
-      $user = User::show("*")->where("id","=",2);
+      $user = User::show("*")->where("id","=",$id);
       return User::edit($user, $updates);
     }
 }

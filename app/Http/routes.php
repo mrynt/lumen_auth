@@ -66,7 +66,17 @@ $app->post('users/{id}/',[
 ]);
 
 /*
-/ Info user with id
+/ Create
+*/
+$app->put('users/',[
+    'middleware' => array(
+      'authToken'
+    ),
+    'uses' => 'UserController@create'
+]);
+
+/*
+/ Info user list
 */
 $app->get('users/',[
     'middleware' => array(

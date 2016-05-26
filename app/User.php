@@ -21,13 +21,13 @@ class User extends Model implements
      * @var array
      */
 
-    protected $guarded = [];
-
     /**
      * The attributes excluded from the model's JSON form.
      *
      * @var array
      */
+
+    protected $guarded = ['id'];
     protected $hidden = [
         'salt',
         'api_token'
@@ -65,11 +65,19 @@ class User extends Model implements
       return self::show("*")->get();
     }
 
-    static function get($id){
+    static function get_($id){
       return self::show("*")->where("id", "=", $id)->first();
     }
 
     static function me(){
       return self::show("my")->first();
+    }
+
+    static function store($fields){
+      return Authorization::store( "*" , new User() , $fields );
+    }
+
+    static function register($fields){
+      return Authorization::store( "my" , new User() , $fields );
     }
 }
