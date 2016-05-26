@@ -111,8 +111,30 @@ class AuthorizationController extends Controller
       }
     }
 
-    static function destroy(){
-
+    static function destroy($where = null, $object){
+      $auth=self::auth();
+      if (isset($auth)) {
+        if (is_object($where)){
+          if (isset($where->permission)) {
+            $permission = $where->permission;
+          } else {
+            $permission=0;
+          }
+        } else {
+          throw new \RuntimeException('Only object.');
+        }
+        $fields_own = Authorization::select("field","own")
+                              ->where("auth", "=", $auth)
+                              ->where("destroy", ">=", $permission)
+                              ->where("destroy", "!=", 0)
+                              ->where("object", "=", get_class_name($object));
+        $select=$fields_own->pluck('field')->all();
+        if (in_array("*",$select)) {
+          return $where->delete();
+        } else {
+          return false;
+        }
+      }
     }
 
     static function show($where = null, $object){

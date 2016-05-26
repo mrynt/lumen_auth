@@ -120,4 +120,9 @@ class UserController extends Controller
       $user = User::show("*")->where("id","=",$id);
       return User::edit($user, $updates);
     }
+
+    public function delete($id){
+      $user = User::show("*")->where("id","=",$id);
+      return Authorization::destroy( $user , new User() );
+    }
 }

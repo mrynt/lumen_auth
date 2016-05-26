@@ -76,6 +76,16 @@ $app->put('users/',[
 ]);
 
 /*
+/ Remove
+*/
+$app->delete('users/{id}',[
+    'middleware' => array(
+      'authToken'
+    ),
+    'uses' => 'UserController@delete'
+]);
+
+/*
 / Info user list
 */
 $app->get('users/',[
