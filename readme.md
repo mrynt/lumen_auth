@@ -40,7 +40,9 @@ You can use this method to get informations from the database in a safe way.
 show($whom, $object)
 ```
 $whom: "my" | "\*"
+
 $object: every kind of declared object in your project
+
 returns: the eloquent model of object (so remember to "->get()"!)
 
 ## License
