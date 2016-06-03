@@ -21,6 +21,14 @@ class UserController extends Controller
     {
     }
 
+    public function group($id){
+      return User::group($id)->first();
+    }
+
+    public function authorizations($id){
+      return User::authorizations($id)->get();
+    }
+
     public function login(Request $request){
       if ($request->has('username') && $request->has('password')) {
         $token = User::login($request->username, $request->password);
@@ -100,7 +108,9 @@ class UserController extends Controller
     }
 
     public function list(Request $request){
-      return User::list();
+      $number=$request->has('request')?$request->number:15;
+      $page=$request->has('page')?$request->page:1;
+      return User::list($number, $page);
     }
 
     public function info(Request $request, $id){

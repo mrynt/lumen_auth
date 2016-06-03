@@ -56,6 +56,26 @@ $app->get('users/{id}',[
 ]);
 
 /*
+/ Get user's group infromations
+*/
+$app->get('users/{id}/group',[
+    'middleware' => array(
+      'authToken'
+    ),
+    'uses' => 'UserController@group'
+]);
+
+/*
+/ Get user's authorizations infromations
+*/
+$app->get('users/{id}/authorizations',[
+    'middleware' => array(
+      'authToken'
+    ),
+    'uses' => 'UserController@authorizations'
+]);
+
+/*
 / Edit
 */
 $app->post('users/{id}/',[
@@ -93,4 +113,85 @@ $app->get('users/',[
       'authToken'
     ),
     'uses' => 'UserController@list'
+]);
+
+/*
+|--------------------------------------------------------------------------
+| Authorizations routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register the authorization's routes for the application.
+|
+*/
+
+/*
+/ List
+/ Get the authorizations list
+*/
+$app->get('auth/', [
+  'middleware' => array(
+    'authToken'
+  ),
+  'uses' => 'AuthorizationController@list'
+]);
+
+/*
+/ Create
+*/
+$app->put('auth/',[
+    'middleware' => array(
+      'authToken'
+    ),
+    'uses' => 'AuthorizationController@create'
+]);
+
+/*
+/ Delete
+*/
+$app->delete('auth/{id}',[
+    'middleware' => array(
+      'authToken'
+    ),
+    'uses' => 'AuthorizationController@delete'
+]);
+
+/*
+/ Edit
+*/
+$app->post('auth/{id}/',[
+    'middleware' => array(
+      'authToken'
+    ),
+    'uses' => 'AuthorizationController@edit'
+]);
+
+/*
+|--------------------------------------------------------------------------
+| Group routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register the group's routes for the application.
+|
+*/
+
+/*
+/ List users
+/ Get list of users in this group
+*/
+$app->get('groups/{description}/users', [
+  'middleware' => array(
+    'authToken'
+  ),
+  'uses' => 'GroupController@listUsers'
+]);
+
+/*
+/ List authorizations
+/ Get list of users in this group
+*/
+$app->get('groups/{description}/auths', [
+  'middleware' => array(
+    'authToken'
+  ),
+  'uses' => 'GroupController@listAuths'
 ]);

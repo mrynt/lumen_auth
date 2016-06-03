@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use App\Http\Controllers\AuthorizationController as Authorization;
-
+use Illuminate\Pagination\Paginator as Paginator;
 class User extends Model implements
     AuthenticatableContract,
     AuthorizableContract
@@ -29,9 +29,18 @@ class User extends Model implements
 
     protected $guarded = ['id'];
     protected $hidden = [
-        'salt',
-        'api_token'
+        'salt'
     ];
+
+    public static function group($id){
+        $user = self::show("my")->find($id);
+        return Authorization::belongsTo($user, 'App\Group','auth', 'auth');
+    }
+
+    public static function authorizations($id){
+      $user = self::show("my")->find($id);
+      return Authorization::hasManyThrough($user, 'App\Authorization', 'App\Group'  ,'auth', 'auth');
+    }
 
     public static function show($type){
       return Authorization::show( $type , new User() );
@@ -61,8 +70,11 @@ class User extends Model implements
       return self::where("api_token", "=", $token)->first();
     }
 
-    static function list(){
-      return self::show("*")->get();
+    static function list($number,$page){
+      Paginator::currentPageResolver(function() use ($page) {
+          return $page;
+      });
+      return self::show("*")->paginate($number);
     }
 
     static function get_($id){
